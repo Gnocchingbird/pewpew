@@ -1,15 +1,20 @@
 int starPosition = 0; // zum Bewegen der Sterne
+PImage bg;            //
+PImage pl;            //
 
-void setup(){
-  size (1024,700);
+void setup() {
+  size(1024,700);
+  bg = loadImage("paint.png");  // Load the image into the program  
+  pl = loadImage("pew.png");
+  
+
 }
 
-void draw(){
+void draw() {
   starPosition += 5;
-  
-  background (30);
-  
-  //stars
+   background (30);
+   
+     //stars
   stroke(240);
   fill(255);
   ellipse(266, (starPosition + 75) % 700, 3, 3);
@@ -36,10 +41,10 @@ void draw(){
   //player
   stroke (0,0,200);
   fill (13,57,96);
-  ellipse (112,100,24,30);
-  rect (100,100,24,40);
-  triangle (100, 130, 100, 110, 80, 130);
-  triangle (124, 130, 124, 110, 144, 130);
+  ellipse (mouseX+12,mouseY,24,30);
+  rect (mouseX,mouseY,24,40);
+  triangle (mouseX,mouseY+30, mouseX,mouseY+10, mouseX-20, mouseY+30);
+  triangle (mouseX+24,mouseY+30, mouseX+24,mouseY+10, mouseX+44, mouseY+30);
   
   //player bullet
   fill (100,100,230);
