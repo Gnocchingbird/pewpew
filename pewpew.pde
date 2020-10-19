@@ -1,20 +1,31 @@
 int starPosition = 0; // zum Bewegen der Sterne
-PImage bg;            //
-PImage pl;            //
+int pX;  //player position
+int pY;
+PImage flame1;         // visual element
+PImage flame2;
+boolean flame_mode = false; //visual perk
 
 void setup() {
   size(1024,700);
-  bg = loadImage("paint.png");  // Load the image into the program  
-  pl = loadImage("pew.png");
+  flame1 = loadImage("flame.png");  // Load the image into the program  
+  flame2 = loadImage("flame_rev.png");
   
 
 }
 
 void draw() {
+  if(starPosition % 100 == 0){
+    if(flame_mode){
+      flame_mode = false;
+    }
+    else{
+      flame_mode = true;
+    }
+  }
   starPosition += 5;
-   background (30);
+  background (30);
    
-     //stars
+  //stars
   stroke(240);
   fill(255);
   ellipse(266, (starPosition + 75) % 700, 3, 3);
@@ -39,12 +50,22 @@ void draw() {
   ellipse(744, (starPosition + 135) % 700, 3, 3);
   
   //player
+  pX = mouseX;
+  pY = mouseY;
   stroke (0,0,200);
   fill (13,57,96);
-  ellipse (mouseX+12,mouseY,24,30);
-  rect (mouseX,mouseY,24,40);
-  triangle (mouseX,mouseY+30, mouseX,mouseY+10, mouseX-20, mouseY+30);
-  triangle (mouseX+24,mouseY+30, mouseX+24,mouseY+10, mouseX+44, mouseY+30);
+  ellipse (pX,pY- 10,24,30);
+  rect (pX - 12,pY - 10,24,40);
+  triangle (pX - 12,pY + 20, pX - 12, pY, pX-32, pY + 20);
+  triangle (pX + 12,pY + 20, pX + 12, pY, pX+32, pY + 20);
+  if(flame_mode){
+    image(flame2, pX - 12, pY + 30);
+    image(flame1, pX, pY + 30);
+  }
+  else{
+    image(flame1, pX - 12, pY + 30);
+    image(flame2, pX, pY + 30);
+  }
   
   //player bullet
   fill (100,100,230);
