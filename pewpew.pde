@@ -14,7 +14,7 @@ void setup() {
 }
 
 void draw() {
-  if(starPosition % 100 == 0){
+  if(starPosition % 100 == 0){ //change mode from true to false, vice versa
     if(flame_mode){
       flame_mode = false;
     }
@@ -49,7 +49,7 @@ void draw() {
   ellipse(916, (starPosition + 25) % 700, 3, 3);
   ellipse(744, (starPosition + 135) % 700, 3, 3);
   
-  //player
+  //player, relative to mouse position
   pX = mouseX;
   pY = mouseY;
   stroke (0,0,200);
@@ -58,7 +58,7 @@ void draw() {
   rect (pX - 12,pY - 10,24,40);
   triangle (pX - 12,pY + 20, pX - 12, pY, pX-32, pY + 20);
   triangle (pX + 12,pY + 20, pX + 12, pY, pX+32, pY + 20);
-  if(flame_mode){
+  if(flame_mode){                                            //change displayed flame-image depending on flame_mode
     image(flame2, pX - 12, pY + 30);
     image(flame1, pX, pY + 30);
   }
