@@ -1,6 +1,12 @@
-int starPosition = 0; // zum Bewegen der Sterne
+int counter = 0; // variable for tracking the time
 int pX;  //player position
 int pY;
+int maxPBullet = 20; // max number of player bullets
+int currentBullet = 0;
+int[] pBX = new int[maxPBullet]; //player bullet locations
+int[] pBY = new int[maxPBullet];
+int fireRate = 100; // time between shots (only multiples of 5)
+
 PImage flame1;         // visual element
 PImage flame2;
 boolean flame_mode = false; //visual perk
@@ -14,7 +20,7 @@ void setup() {
 }
 
 void draw() {
-  if(starPosition % 100 == 0){ //change mode from true to false, vice versa
+  if(counter % 100 == 0){ //change mode from true to false, vice versa
     if(flame_mode){
       flame_mode = false;
     }
@@ -22,43 +28,43 @@ void draw() {
       flame_mode = true;
     }
   }
-  starPosition += 5;
+  counter += 5;
   background (30);
    
   //stars
   stroke(240);
   fill(255);
-  ellipse(266, (starPosition + 75) % 700, 3, 3);
-  ellipse(965, (starPosition + 483) % 700, 3, 3);
-  ellipse(685, (starPosition + 473) % 700, 3, 3);
-  ellipse(356, (starPosition + 119) % 700, 3, 3);
-  ellipse(928, (starPosition + 91) % 700, 3, 3);
-  ellipse(430, (starPosition + 349) % 700, 3, 3);
-  ellipse(85, (starPosition + 293) % 700, 3, 3);
-  ellipse(33, (starPosition + 645) % 700, 3, 3);
-  ellipse(866, (starPosition + 583) % 700, 3, 3);
-  ellipse(175, (starPosition + 587) % 700, 3, 3);
-  ellipse(838, (starPosition + 400) % 700, 3, 3);
-  ellipse(31, (starPosition + 8) % 700, 3, 3);
-  ellipse(925, (starPosition + 275) % 700, 3, 3);
-  ellipse(582, (starPosition + 215) % 700, 3, 3);
-  ellipse(827, (starPosition + 462) % 700, 3, 3);
-  ellipse(782, (starPosition + 585) % 700, 3, 3);
-  ellipse(124, (starPosition + 526) % 700, 3, 3);
-  ellipse(291, (starPosition + 11) % 700, 3, 3);
-  ellipse(916, (starPosition + 25) % 700, 3, 3);
-  ellipse(744, (starPosition + 135) % 700, 3, 3);
+  ellipse(266, (counter + 75) % 700, 3, 3);
+  ellipse(965, (counter + 483) % 700, 3, 3);
+  ellipse(685, (counter + 473) % 700, 3, 3);
+  ellipse(356, (counter + 119) % 700, 3, 3);
+  ellipse(928, (counter + 91) % 700, 3, 3);
+  ellipse(430, (counter + 349) % 700, 3, 3);
+  ellipse(85, (counter + 293) % 700, 3, 3);
+  ellipse(33, (counter + 645) % 700, 3, 3);
+  ellipse(866, (counter + 583) % 700, 3, 3);
+  ellipse(175, (counter + 587) % 700, 3, 3);
+  ellipse(838, (counter + 400) % 700, 3, 3);
+  ellipse(31, (counter + 8) % 700, 3, 3);
+  ellipse(925, (counter + 275) % 700, 3, 3);
+  ellipse(582, (counter + 215) % 700, 3, 3);
+  ellipse(827, (counter + 462) % 700, 3, 3);
+  ellipse(782, (counter + 585) % 700, 3, 3);
+  ellipse(124, (counter + 526) % 700, 3, 3);
+  ellipse(291, (counter + 11) % 700, 3, 3);
+  ellipse(916, (counter + 25) % 700, 3, 3);
+  ellipse(744, (counter + 135) % 700, 3, 3);
   
   //player, relative to mouse position
   pX = mouseX;
   pY = mouseY;
   stroke (0,0,200);
-  fill (13,57,96);
+  fill (180,180,200);
   ellipse (pX,pY- 10,24,30);
   rect (pX - 12,pY - 10,24,40);
   triangle (pX - 12,pY + 20, pX - 12, pY, pX-32, pY + 20);
   triangle (pX + 12,pY + 20, pX + 12, pY, pX+32, pY + 20);
-  if(flame_mode){                                            //change displayed flame-image depending on flame_mode
+  if(flame_mode){  //change displayed flame-image depending on flame_mode
     image(flame2, pX - 12, pY + 30);
     image(flame1, pX, pY + 30);
   }
@@ -68,8 +74,20 @@ void draw() {
   }
   
   //player bullet
-  fill (100,100,230);
-  ellipse (5,300,5,10);
+  //fill (100,100,230);
+  
+  if(counter % fireRate == 0){
+    if (currentBullet == 19){
+      currentBullet = 0;
+    }
+    pBX[currentBullet] = pX;
+    pBY[currentBullet] = pY - 30;
+    currentBullet++;
+  }
+  for(int i = 0; i < maxPBullet; i++){
+    ellipse(pBX[i], pBY[i], 5, 5);
+    pBY[i] -= 5;
+  }
   
   //enemy
   stroke (200,0,0);
