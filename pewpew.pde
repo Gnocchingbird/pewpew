@@ -6,6 +6,7 @@ int currentBullet = 0;
 int[] pBX = new int[maxPBullet]; //player bullet locations
 int[] pBY = new int[maxPBullet];
 int fireRate = 100; // time between shots (only multiples of 5)
+int eventCounter, prevEventCounter; // makes various events occur (shot fired, fire animation...)
 
 PImage flame1;         // visual element
 PImage flame2;
@@ -20,7 +21,17 @@ void setup() {
 }
 
 void draw() {
-  if(counter % 100 == 0){ //change mode from true to false, vice versa
+  
+  counter += 300 / frameRate;
+  background (30);
+  fill(255);
+  text(frameRate, 500, 400);
+  text(counter, 500, 500);
+  if(counter / 100 > eventCounter){
+    eventCounter = counter / 100;
+  }
+  
+  if(eventCounter != prevEventCounter){ //change mode from true to false, vice versa
     if(flame_mode){
       flame_mode = false;
     }
@@ -28,12 +39,15 @@ void draw() {
       flame_mode = true;
     }
   }
-  counter += 5;
-  background (30);
    
   //stars
   stroke(240);
   fill(255);
+  /*for(int i = 0; i < 20; i++){
+    int eX = int(random(0, 1025));
+    int eY = int(random(0, 701));
+    ellipse(eX, (counter + eY) % 700, 3, 3);
+  }*/
   ellipse(266, (counter + 75) % 700, 3, 3);
   ellipse(965, (counter + 483) % 700, 3, 3);
   ellipse(685, (counter + 473) % 700, 3, 3);
@@ -76,8 +90,8 @@ void draw() {
   //player bullet
   //fill (100,100,230);
   
-  if(counter % fireRate == 0){
-    if (currentBullet == 19){
+  if(eventCounter != prevEventCounter){
+    if (currentBullet == maxPBullet - 1){
       currentBullet = 0;
     }
     pBX[currentBullet] = pX;
@@ -99,5 +113,5 @@ void draw() {
   ellipse (0,300,5,10);
   
   
-  
+  prevEventCounter = eventCounter;
 }
