@@ -1,14 +1,24 @@
 //import processing.sound.*;
-//SoundFile music;
-//SoundFile killsnd;
+//SoundFile music;//background music
+//SoundFile killsnd;//kill sound
+//SoundFile gameOver;//game over sound
+
+int buttX, buttY;
+int buttS;
+
+color buttHighlight;
+color buttColor;
+color currentColor;
+color baseColor;
+
 int counter= 0;// zum Bewegen der Sterne
 int pX=955,pY=540;//player position
 int pVX=10,pVY=6;//player velocity in X and Y directions
 int score=0;//player score
-int maxENum = 1;
+int maxENum = 3;
 float[] eX=new float[maxENum];
 float[] eY=new float[maxENum];//enemy position
-int eV = 3;
+int eV = 0;
 
 int maxPBullet = 21;// max number of player bullets
 int maxEBullet = maxENum * 20;// max number of enemy bullets
@@ -16,6 +26,9 @@ int currentBullet = 0;
 int currentEBullet = 0;
 float[] pBX = new float[maxPBullet]; //player bullet locations
 float[] pBY = new float[maxPBullet];
+int sBX, sBY; // special Bullet location
+int specialCooldown = 1000;
+int specialCounter = -1000;
 boolean[] pBExists = new boolean[maxPBullet]; // lets used bullets vanish
 float[][] eBX = new float[maxENum][maxEBullet];//enemy bullet locations
 float[][] eBY = new float[maxENum][maxEBullet];
@@ -33,6 +46,8 @@ int playerLives = 3;
 int[] enemyLives = new int[maxENum];
 PImage flame1,flame2;// visual element
 PImage heart;
+PImage mute, sound;
+boolean buttOver=false;
 boolean flame_mode = false;//visual perk
 
 
@@ -58,6 +73,11 @@ void setup() {
   }
   //music=new SoundFile(this,"background_music.mp3");
   //music.loop();
+  //gameOver = new SoundFile(this, "game_Over.wav");
+  //killsnd = new SoundFile(this, "Bit_Explosion.wav");
+  //music = new SoundFile(this, "background_music.mp3");
+  //music.loop(1, 1, 0.3);
+  
   for(int i = 0; i < maxENum; i++){
     int border = int(1920 / maxENum);
     eX[i] = int(random(i* border + 20, (i + 1) * border - 20));
@@ -66,6 +86,19 @@ void setup() {
     leastYDiff[i] = 20;
   }
   pBY[20] = 1000; // needed for leastYDiff
+  
+  buttX=1870;
+  buttY=30;
+  buttS=50;
+  buttHighlight=color(204);
+  mute=loadImage("mute.png");
+  sound=loadImage("sound.png");
+  sound.resize(50, 50);
+  mute.resize(50, 50);
+  buttColor=color(104);
+  baseColor=color(255);
+  currentColor=baseColor;
+  
 }
 
 void draw() {
@@ -101,6 +134,24 @@ void draw() {
   rect (pX - 12,pY - 10,24,40);
   triangle (pX - 12,pY + 20, pX - 12, pY, pX-32, pY + 20);
   triangle (pX + 12,pY + 20, pX + 12, pY, pX+32, pY + 20);
+  
+  if(counter - specialCounter < specialCooldown){
+    stroke(0);
+    noFill();
+  }
+  else{
+    stroke(255, 0, 0);
+  }
+  rect(pX - 30, pY + 50, 60, 10);
+  fill(255, 200, 0);
+  if(counter - specialCounter < 1000){ // special shot indicator
+    rect(pX - 30, pY + 50, 60.0 * ((counter - specialCounter) / 1000.0), 10);
+  }
+  else{
+    rect(pX - 30, pY + 50, 60, 10);
+  }
+  stroke(0);
+  
   if(flame_mode){  //change displayed flame-image depending on flame_mode
     image(flame2, pX - 12, pY + 30);
     image(flame1, pX, pY + 30);
@@ -148,8 +199,22 @@ void draw() {
         if(pBY[i] > 135 && abs(pBY[i] - eY[j]) < pBY[leastYDiff[j]] - eY[j]){
           leastYDiff[j] = i;
         }
-      
+      if(eX[j] - 15<=sBX + 5 && eX[j]+15>=sBX-5 && eY[j] + 15>=sBY-5 && eY[j] < sBY + 5){
+        sBX = -50;
+        enemyLives[j] -= 3;
+        if(enemyLives[j] <= 0){ // triggers on kill
+          score += 100;
+          for(int k = j + 1; k < maxENum; k++){ // loops from killed enemy to end of array, pushing the values together (necessary for loops that compare between adjacent entries)
+            eX[k - 1] = eX[k];
+            eY[k - 1] = eY[k];
+            enemyLives[k - 1] = enemyLives[k];
+          }
+          enemyLives[maxENum - 1] = 0; // sets the last enemy to be the recently dead one
+        }
+      }
     }
+    
+    
     if(pBExists[i] == true){ // draws bullet if it exists
       ellipse(pBX[i], pBY[i], 5, 5);
     }
@@ -157,23 +222,26 @@ void draw() {
     if(i != 20){
       pBY[i] -= 5; // moves every bullet upward
     }
-}
-println(leastYDiff[0]);
-println(pBY[20]);
+  }
+  
+  sBY -= 10;
+  stroke(255, 0, 0);
+  fill(255, 200, 0);
+  ellipse(sBX, sBY, 10, 10);
 
   for(int i = 0; i < maxENum; i++){
     if(pBY[leastYDiff[i]] > 135){
       if(eX[i] < pBX[leastYDiff[i]]){
-        eBRepulsion[i] = -40 / (pBX[leastYDiff[i]] - eX[i]);
+        eBRepulsion[i] = -dodge / (pBX[leastYDiff[i]] - eX[i]);
       }
       if(pBX[leastYDiff[i]] < eX[i]){
-        eBRepulsion[i] = 40 / (eX [i] - pBX[leastYDiff[i]]);
+        eBRepulsion[i] = dodge / (eX [i] - pBX[leastYDiff[i]]);
       }
       if(eX[i] < pBX[leastYDiff[i]] && pBX[leastYDiff[i]] < eX[i] + 20){
-        eBRepulsion[i] = -2 - (pBX[leastYDiff[i]] - eX[i]) / 20;
+        eBRepulsion[i] = -2 - (pBX[leastYDiff[i]] - eX[i]) / (dodge / 2);
       }
       if(pBX[leastYDiff[i]] < eX[i] && eX[i] < pBX[leastYDiff[i]] + 20){
-        eBRepulsion[i] = 2 + (eX[i] - pBX[leastYDiff[i]]) / 20;
+        eBRepulsion[i] = 2 + (eX[i] - pBX[leastYDiff[i]]) / (dodge / 2);
       }
     }
     leastYDiff[i] = 20;
@@ -265,7 +333,28 @@ println(pBY[20]);
       rect(eX[i]-15,eY[i],30,15);
     }*/
     
-   
+  if (playerLives==0) {
+    //gameOver.play();
+    text("GAME OVER", width/2-20, height/2);
+  }
+  
+  //volume button
+  noStroke();
+  update(mouseX, mouseY);
+  if (buttOver) {
+    fill(buttHighlight);
+  } else {
+    fill(buttColor);
+  }
+  rect(buttX, buttY, buttS, buttS);
+  
+  /*if (music.isPlaying()) {
+    image(sound, buttX, buttY);
+  }
+  else {
+    image(mute, buttX, buttY);
+  }*/
+  
   
   //devstats
   fill(255);
@@ -309,6 +398,23 @@ println(pBY[20]);
   }
 }
 
+void update(int x, int y) {
+  if (overButt(buttX, buttY, buttS, buttS)) {
+    buttOver=true;
+  } else {
+    buttOver=false;
+  }
+}
+
+void specialShot(){
+  if(counter - specialCounter > specialCooldown){
+    sBX = pX;
+    sBY = pY - 30;
+    specialCounter = counter;
+  }
+}
+  
+
 void keyPressed(){ // keyboard input
   if(key == 'w' || key == 'W'){
     wPressed = true;
@@ -325,6 +431,9 @@ void keyPressed(){ // keyboard input
   if(key == 'r' || key == 'R'){
     setup();
   }
+  if(key == 'e' || key == 'E'){
+    specialShot();
+  }
 }
 
 void keyReleased(){
@@ -339,5 +448,26 @@ void keyReleased(){
   }
   if(key == 'd' || key == 'D'){
     dPressed = false;
+  }
+}
+
+
+//button
+void mousePressed() {
+  if (buttOver) {
+
+    /*if (music.isPlaying()) {
+      music.pause();
+    } else {
+      music.play();
+    }*/
+  }
+}
+
+boolean overButt(int x, int y, int width, int height) {
+  if (mouseX>=x && mouseX<=x+width && mouseY>=y && mouseY<=y+height) {
+    return true;
+  } else {
+    return false;
   }
 }
