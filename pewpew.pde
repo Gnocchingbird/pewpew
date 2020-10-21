@@ -5,7 +5,7 @@ int counter= 0;// zum Bewegen der Sterne
 int pX=955,pY=540;//player position
 int pVX=10,pVY=6;//player velocity in X and Y directions
 int score=0;//player score
-int maxENum = 8;
+int maxENum = 100;
 int[] eX=new int[maxENum];
 int[] eY=new int[maxENum];//enemy position
 int eV = 3;
@@ -25,7 +25,6 @@ int fireRate = 100; // time between shots (only multiples of 5)
 int eventCounter, prevEventCounter; // makes various events occur (shot fired, fire animation...)
 int[] starX = new int[20];
 int[] starY = new int[20];
-//int 
 
 int playerLives = 3;
 int[] enemyLives = new int[maxENum];
@@ -126,6 +125,14 @@ void draw() {
         pBExists[i] = false;
         pBX[i] = - 50;
         enemyLives[j]--;
+        if(enemyLives[j] == 0){
+          for(int k = j + 1; k < maxENum; k++){
+            eX[k - 1] = eX[k];
+            eY[k - 1] = eY[k];
+            enemyLives[k - 1] = enemyLives[k];
+          }
+          enemyLives[maxENum - 1] = 0;
+        }
       }
     }
     
@@ -140,33 +147,28 @@ void draw() {
   
   //enemies
   for(int i = 0; i < maxENum; i++){
-    stroke (200,0,0);
-    if(enemyLives[i] <= 0){
-      fill(100, 30, 75, 0);
-    }
-    if(enemyLives[i] == 1){
-      fill(100, 30, 75, 180);
-    }
-    if(enemyLives[i] == 2){
+    if(enemyLives[i] > 0){
+      stroke (200,0,0);
       fill (100,30,75);
-    }
-    triangle (eX[i] - 15, eY[i], eX[i] + 15, eY[i], eX[i], eY[i] + 15);
-    if(pX < eX[i]){
-      if(i != 0){
-        eRepulsion[i] = int(120 / (eX[i] - eX[i - 1]));
-      eX[i] -= eV - eRepulsion[i];
+      triangle (eX[i] - 15, eY[i], eX[i] + 15, eY[i], eX[i], eY[i] + 15);
+      text(enemyLives[i], eX[i] - 5, eY[i] - 5);
+      if(pX < eX[i]){
+        if(i != 0){
+          eRepulsion[i] = int(120 / (eX[i] - eX[i - 1]));
+        eX[i] -= eV - eRepulsion[i];
+        }
+        else{
+          eX[i] -= eV;
+        }
       }
-      else{
-        eX[i] -= eV;
-      }
-    }
-    if(pX > eX[i]){
-      if(i + 1 != maxENum){
-        eRepulsion[i] = int(120 / (eX[i + 1] - eX[i]));
-      eX[i] += eV - eRepulsion[i];
-      }
-      else{
-        eX[i] += eV;
+      if(pX > eX[i]){
+        if(i + 1 != maxENum){
+          eRepulsion[i] = int(120 / (eX[i + 1] - eX[i]));
+        eX[i] += eV - eRepulsion[i];
+        }
+        else{
+          eX[i] += eV;
+        }
       }
     }
   }
@@ -187,16 +189,17 @@ void draw() {
   }
   for(int i = 0; i < maxEBullet; i++){
     for(int j = 0; j < maxENum; j++){
-      if(eBX[j][i] + 2 >= pX-12 && eBX[j][i] - 2 <= pX + 12 && eBY[j][i] + 2 >= pY - 25 && eBY[j][i] - 2 <= pY + 25){
-        eBExists[j][i] = false;
-        eBX[j][i] = -50;
-        playerLives--;
+      if(enemyLives[j] > 0){
+        if(eBX[j][i] + 2 >= pX-12 && eBX[j][i] - 2 <= pX + 12 && eBY[j][i] + 2 >= pY - 25 && eBY[j][i] - 2 <= pY + 25){
+          eBExists[j][i] = false;
+          eBX[j][i] = -50;
+          playerLives--;
+        }
+        if(eBExists[j][i]){
+          ellipse(eBX[j][i], eBY[j][i], 5, 5);
+        }  
+        eBY[j][i] += 5;
       }
-      if(eBExists[j][i]){
-        ellipse(eBX[j][i], eBY[j][i], 5, 5);
-      }
-      
-      eBY[j][i] += 5;
     }
   }
   prevEventCounter = eventCounter;
